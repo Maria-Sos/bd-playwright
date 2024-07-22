@@ -1,0 +1,27 @@
+{
+  "name": "brandlive",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "run:tests:ui": "playwright test --ui",
+    "run:tests:headed": "playwright test --headed",
+    "run:tests": "playwright test",
+    "generate:tests": "playwright codegen demo.playwright.dev/todomvc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.45.2",
+    "@types/node": "^20.14.11"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "imap": "^0.8.19",
+    "mailparser": "^3.7.1",
+    "playwright": "^1.45.2",
+    "simple-parser": "^0.0.0"
+  }
+}
