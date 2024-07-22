@@ -44,8 +44,9 @@ test.describe('Navigate to event', () => {
       const eventPage = new EventPage(page);
       await expect(eventPage.speakersHeader).toHaveText('Meet our featured speakers');
       await expect(page).toHaveURL(/home/);
-      await eventPage.clickWatchButton();
+      await eventPage.watchButton.click();
       await expect(eventPage.videoTitle).toBeVisible();
       await expect(page).toHaveURL(`session/${process.env.EVENT_ID}`);
+      await expect(eventPage.video).toHaveJSProperty('paused', false, {timeout: 15000});
   });
 });
