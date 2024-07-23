@@ -28,17 +28,18 @@ test.describe('Navigate to event', () => {
     await page.goto(loginLink);
   });
 
-//   test.afterEach(async ({ page }) => {
-//     const profilePage = new ProfilePage(page);
-//     const profileHeading = page.locator('text="My profile"');
+  test.afterEach(async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    profilePage.navigateToProfile();
+    await profilePage.profileMenu.waitFor({state: 'visible'})
 
-//     if (await profilePage.profileMenu.isVisible()) {
-//         await profilePage.logOut();
-//         await expect(page.url()).toContain('registration');
-//     } else {
-//         expect(page.url()).toContain('registration');
-//     }
-// });
+    if (await profilePage.profileMenu.isVisible()) {
+        await profilePage.logOut();
+        expect(page.url()).toContain('registration');
+    } else {
+        expect(page.url()).toContain('registration');
+    }
+});
 
   test("Navigate to even page succesfully", async ({ page }) => {
       const eventPage = new EventPage(page);

@@ -8,7 +8,13 @@ class ProfilePage {
         this.avatar = page.locator('.registration-avatar');
         this.mainMenu = page.locator('div.upper > div.left > button').first();
         this.menuProfileAvatar = page.locator('#profile-details-dropdown-container img');
-        
+        this.editButton = page.getByRole('button', { name: 'Edit' });
+        this.editModal = page.locator('#modal-global-container');
+        this.firstNameInput = page.getByPlaceholder('First Name');
+        this.lastNameInput = page.getByPlaceholder('Last Name');
+        this.saveButton = page.getByRole('button', { name: 'Save' });
+        this.name = page.locator('h2.general-info-name');
+
     }
 
     async navigateToProfile() {

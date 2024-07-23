@@ -17,7 +17,6 @@ test.describe.skip("Registration form", () => {
     test.afterEach(async ({ page }) => {
         const ProfilePage = require('../pages/ProfilePage');
         const profilePage = new ProfilePage(page);
-        const profileHeading = page.locator('text="My profile"');
     
         if (await profilePage.profileMenu.isVisible()) {
             await profilePage.logOut();

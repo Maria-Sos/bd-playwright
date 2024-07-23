@@ -8,7 +8,7 @@ class EventPage {
         this.videoTitle = page.locator('.video-title h4:has-text("Informational video about BrandLive")');
         this.video = page.frameLocator('iframe[title="Meet the Brandlive Platform"]').locator('video');
         this.chatInput = page.getByPlaceholder('Chat...');
-        this.saveButtun = page.getByRole('button', { name: 'Send' });
+        this.saveButton = page.getByRole('button', { name: 'Send' });
       }
     
     async navigate() {

@@ -17,7 +17,8 @@ module.exports = defineConfig({
     headless: true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
-    actionTimeout: 10 * 1000
+    actionTimeout: 10 * 1000,
+    timeout: 60000
   },
   projects: [
     {
