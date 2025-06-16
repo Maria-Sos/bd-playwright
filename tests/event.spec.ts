@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { fetchLoginLinkFromEmail } from '../utils/authlogin';
 import * as dotenv from 'dotenv';
 dotenv.config();
 import { RegistrationPage } from '@pages/RegistrationPage';
 import { ProfilePage } from '@pages/ProfilePage';
 import { EventPage } from '@pages/EventPage';
+import { HelperBase } from '@pages/HelperBase';
 
 const SERVER_ID = process.env.MAILOSAUR_SERVER_ID;
 const TARGET_EMAIL = `${process.env.MAILOSAUR_EMAIL_PREFIX}@${SERVER_ID}.mailosaur.net`;
@@ -12,32 +12,16 @@ const TARGET_EMAIL = `${process.env.MAILOSAUR_EMAIL_PREFIX}@${SERVER_ID}.mailosa
   // Login via email link for registrated user:
   test.beforeEach(async ({ page }) => {
     const registrationPage = new RegistrationPage(page);
-    await registrationPage.navigate();
-    await registrationPage.loginButton.click();
-    await registrationPage.emailInput.fill(TARGET_EMAIL);
-    await registrationPage.submitButton.click();
-    await page.getByText('Back to Registration').waitFor();
-    
-    const loginLink = await fetchLoginLinkFromEmail();
-    if (!loginLink) {
-      throw new Error('No login link found in the email');
-    }
-    await page.goto(loginLink.href);
+    const helper = new HelperBase(page);
+
+    await registrationPage.loginWithEmail(TARGET_EMAIL);
+    await helper.navigateToLoginLink();
   });
 
 test.describe('Navigate to event', () => {
 
   test.afterEach(async ({ page }) => {
-    const profilePage = new ProfilePage(page);
-    profilePage.navigateToProfile();
-    await profilePage.profileMenu.waitFor({state: 'visible'})
-
-    if (await profilePage.profileMenu.isVisible()) {
-        await profilePage.logOut();
-        expect(page.url()).toContain('registration');
-    } else {
-        expect(page.url()).toContain('registration');
-    }
+    await ProfilePage.logOutFromPage(page);
 });
 
   test("Navigate to even page succesfully", async ({ page }) => {

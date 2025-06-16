@@ -39,11 +39,21 @@ export class ProfilePage {
         await this.page.goto('profile');
     }
 
-
     async logOut() {
         await this.profileMenu.click();
         await this.logOutButton.click();
         await this.heading.waitFor({ state: 'visible' });
     }
 
+    static async logOutFromPage(pageInstance: Page) {
+        const profilePage = new ProfilePage(pageInstance);
+        await profilePage.navigateToProfile();
+        await pageInstance.waitForLoadState("networkidle");
+        if (await profilePage.profileMenu.isVisible()) {
+            await profilePage.logOut();
+            expect(pageInstance.url()).toContain('registration');
+        } else {
+            expect(pageInstance.url()).toContain('registration');
+        }
+    }
 }

@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "run:tests:ui": "playwright test --ui",
-    "run:tests:headed": "playwright test --headed",
-    "run:tests": "playwright test",
+    "run:tests:ui": "npx playwright test --ui",
+    "run:tests": "pnpx playwright test",
     "generate:tests": "playwright codegen demo.playwright.dev/todomvc"
   },
   "keywords": [],
