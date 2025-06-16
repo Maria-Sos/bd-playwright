@@ -5,6 +5,7 @@ on:
 
 jobs:
   test:
+    environment: BL
     timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
