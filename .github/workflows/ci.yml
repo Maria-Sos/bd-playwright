@@ -7,11 +7,17 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
+      MAILOSAUR_SERVER_ID: ${{ secrets.MAILOSAUR_SERVER_ID }}
+      MAILOSAUR_EMAIL_PREFIX: ${{ secrets.MAILOSAUR_EMAIL_PREFIX }}
+      BASE_URL: ${{ secrets.BASE_URL }}
+      EVENT_ID: ${{ secrets.EVENT_ID }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: lts/*
+        node-version: 20
     - name: Install dependencies
       run: npm ci
     - name: Install Playwright Browsers
