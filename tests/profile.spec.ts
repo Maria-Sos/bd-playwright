@@ -1,17 +1,17 @@
 import { test, expect } from "@playwright/test";
 import { fetchLoginLinkFromEmail } from '../utils/authlogin';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 dotenv.config();
-const ProfilePage = require("../pages/ProfilePage");
-const RegistrationPage = require("../pages/RegistrationPage");
-const EventPage = require("../pages/EventPage");
-const path = require("path");
-const fs = require('fs');
+import { RegistrationPage } from '@pages/RegistrationPage';
+import { ProfilePage } from '@pages/ProfilePage';
+import { EventPage } from '@pages/EventPage';
+import path = require("path");
+import fs = require('fs');
 
 const SERVER_ID = process.env.MAILOSAUR_SERVER_ID;
 const TARGET_EMAIL = `${process.env.MAILOSAUR_EMAIL_PREFIX}@${SERVER_ID}.mailosaur.net`;
 
-const getAvaLink = (selector) => {
+const getAvaLink = (selector: string) => {
   const regex = /url\("?(.*?)"?\)/;
   const match = selector.match(regex);
   return match ? match[1] : null;
@@ -20,7 +20,6 @@ const getAvaLink = (selector) => {
 const typeComment = async (pwPage, eventPage, comment, sessionId) => {
   await eventPage.chatInput.fill(comment);
   const commentApiUrl = `e3-comment/${sessionId}`;
-  console.log('sessionId', sessionId);
   const resPromise = pwPage.waitForResponse(response =>
     response.url().includes(commentApiUrl) && response.status() === 200
   );
@@ -103,7 +102,6 @@ test.describe("Verify how changing user's data reflects on event page", () => {
     await Promise.all([performLogin(page1), performLogin(page2)]);
     const regResponse = await page1._regCheckPromise;
     const regBody = await regResponse.json();
-    console.log('regBody:', regBody);
     sessionId = regBody.validSessions[0];
   });
 

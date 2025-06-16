@@ -1,6 +1,5 @@
 const MailosaurClient = require("mailosaur");
-import dotenv from 'dotenv';
-
+import * as dotenv from 'dotenv';
 dotenv.config();
 
 const SERVER_ID = process.env.MAILOSAUR_SERVER_ID;

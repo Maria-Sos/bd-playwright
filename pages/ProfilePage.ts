@@ -1,5 +1,23 @@
-class ProfilePage {
-    constructor(page) {
+import { Locator, Page } from 'playwright';
+import { expect } from 'playwright/test';
+
+export class ProfilePage {
+    readonly page: Page;
+    profileMenu: Locator;
+    logOutButton: Locator;
+    heading: Locator; 
+    avatarInput: Locator;
+    avatar: Locator;
+    mainMenu: Locator;
+    menuProfileAvatar: Locator;
+    editButton: Locator;
+    editModal: Locator;
+    firstNameInput: Locator;
+    lastNameInput: Locator;
+    saveButton: Locator;
+    name: Locator;
+    
+    constructor(page: Page) {
         this.page = page;
         this.profileMenu = page.getByLabel('Open profile pop-up');
         this.logOutButton = page.getByRole('button', { name: 'Logout' });
@@ -25,11 +43,7 @@ class ProfilePage {
     async logOut() {
         await this.profileMenu.click();
         await this.logOutButton.click();
-        await this.heading.waitFor(() => {
-            expect(this.heading).isVisible()
-        });
+        await this.heading.waitFor({ state: 'visible' });
     }
 
 }
-
-module.exports = ProfilePage;

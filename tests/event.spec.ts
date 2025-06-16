@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 import { fetchLoginLinkFromEmail } from '../utils/authlogin';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 dotenv.config();
-import RegistrationPage from '../pages/RegistrationPage';
-import ProfilePage from '../pages/ProfilePage';
-import EventPage from '../pages/EventPage';
+import { RegistrationPage } from '@pages/RegistrationPage';
+import { ProfilePage } from '@pages/ProfilePage';
+import { EventPage } from '@pages/EventPage';
 
 const SERVER_ID = process.env.MAILOSAUR_SERVER_ID;
 const TARGET_EMAIL = `${process.env.MAILOSAUR_EMAIL_PREFIX}@${SERVER_ID}.mailosaur.net`;

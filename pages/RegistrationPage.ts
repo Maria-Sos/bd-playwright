@@ -1,5 +1,23 @@
-class RegistrationPage {
-    constructor(page) {
+import { Locator, Page } from 'playwright';
+
+export class RegistrationPage {
+    readonly page: Page;
+    form: Locator;
+    firstNameInput: Locator;
+    lastNameInput: Locator;
+    emailInput: Locator;
+    favoriteFrameworkInput: Locator;
+    nextButton: Locator;
+    signInButton: Locator;
+    headingNextform: Locator;
+    addAvatar: Locator;
+    skipButton: Locator;
+    errorMessage: Locator;
+    loginButton: Locator;
+    submitButton: Locator;
+    backToRegButton: Locator;
+    
+    constructor(page: Page) {
         this.page = page;
         this.form = page.locator('.registration-form');
         this.firstNameInput = page.getByPlaceholder('First Name');
@@ -67,5 +85,3 @@ class RegistrationPage {
         }
     }
 }
-
-module.exports = RegistrationPage;

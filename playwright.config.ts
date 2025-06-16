@@ -1,6 +1,6 @@
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 dotenv.config();
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: './tests',
@@ -9,15 +9,13 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  retries: 1,
   
   use: {
     baseURL:  process.env.BASE_URL,
     headless: true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
-    actionTimeout: 10 * 1000,
-    timeout: 60000
+    actionTimeout: 10 * 1000
   },
   projects: [
     {
