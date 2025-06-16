@@ -1,7 +1,8 @@
-const { defineConfig, devices } = require('@playwright/test');
+import dotenv from 'dotenv';
+dotenv.config();
+import { defineConfig, devices } from '@playwright/test';
 
-module.exports = defineConfig({
-  globalSetup: './globalSetup.js',
+export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -21,7 +22,7 @@ module.exports = defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+      use: { ...devices['Desktop Chrome'] },
     },
 
     {

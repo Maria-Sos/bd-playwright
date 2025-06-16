@@ -1,11 +1,15 @@
 import { test, expect } from "@playwright/test";
-const { fetchLatestEmail } = require("../utils/imapEmail");
-require('dotenv').config();
+import { fetchLoginLinkFromEmail } from '../utils/authlogin';
+import dotenv from 'dotenv';
+dotenv.config();
 const ProfilePage = require("../pages/ProfilePage");
 const RegistrationPage = require("../pages/RegistrationPage");
 const EventPage = require("../pages/EventPage");
 const path = require("path");
 const fs = require('fs');
+
+const SERVER_ID = process.env.MAILOSAUR_SERVER_ID;
+const TARGET_EMAIL = `${process.env.MAILOSAUR_EMAIL_PREFIX}@${SERVER_ID}.mailosaur.net`;
 
 const getAvaLink = (selector) => {
   const regex = /url\("?(.*?)"?\)/;
@@ -13,9 +17,17 @@ const getAvaLink = (selector) => {
   return match ? match[1] : null;
 };
 
-const typeComment = async (page, comment) => {
-  await page.chatInput.fill(comment);
-  await page.saveButton.click();
+const typeComment = async (pwPage, eventPage, comment, sessionId) => {
+  await eventPage.chatInput.fill(comment);
+  const commentApiUrl = `e3-comment/${sessionId}`;
+  console.log('sessionId', sessionId);
+  const resPromise = pwPage.waitForResponse(response =>
+    response.url().includes(commentApiUrl) && response.status() === 200
+  );
+  await eventPage.saveButton.click();
+  const res = await resPromise;
+  const responseBody = await res.json();
+  return responseBody.id;
 };
 
 const generateRandomFirstName = async () => {
@@ -25,9 +37,9 @@ const generateRandomFirstName = async () => {
 }
 
 const generateRandomLastName = async () => {
-    const firstNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
-    const randomIndex = Math.floor(Math.random() * firstNames.length);
-    return firstNames[randomIndex];
+    const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
+    const randomIndex = Math.floor(Math.random() * lastNames.length);
+    return lastNames[randomIndex];
 }
 
 const getRandomAssetFilePath = () => {
@@ -54,77 +66,61 @@ const logOutFromPage = async (pageInstance) => {
 }
 
 const path_image = getRandomAssetFilePath();
-const apiUrl = process.env.API_URL;
-const regApiUrl = process.env.TES_URL;
 
 let page1;
 let page2;
 let context;
+let sessionId;
+let oldCommentId;
+let newCommentId;
 
 test.describe("Verify how changing user's data reflects on event page", () => {
-  //Opne two tabs and login:
+  // Open two tabs and login:
   test.beforeEach(async ({ browser }) => {
-    // Open two pages (tabs)
     context = await browser.newContext();
     page1 = await context.newPage();
     page2 = await context.newPage();
 
-    // Define a helper function to perform login steps
     async function performLogin(page) {
       const registrationPage = new RegistrationPage(page);
       await registrationPage.navigate();
       await registrationPage.loginButton.click();
-      await registrationPage.emailInput.fill("testbrandlive10@gmail.com");
+      await registrationPage.emailInput.fill(TARGET_EMAIL);
       await registrationPage.submitButton.click();
-      await page.getByText("Back to Registration").waitFor();
+      await page.getByText('Back to Registration').waitFor();
 
-      const email = await fetchLatestEmail();
-      if (!email) {
-        throw new Error("No email found");
+      const loginLink = await fetchLoginLinkFromEmail();
+      if (!loginLink) {
+        throw new Error('No login link found in the email');
       }
-      const loginLinkMatch = email.text.match(/https?:\/\/[^\s]+/);
-      if (!loginLinkMatch) {
-        throw new Error("No login link found in the email");
+      if (page === page1) {
+        page1._regCheckPromise = page1.waitForResponse((response) =>
+          response.url().includes('e3-reregister-check') && response.status() === 200
+        );
       }
-      const loginLink = loginLinkMatch[0];
-      await page.goto(loginLink);
+      await page.goto(loginLink.href);
     }
-
-    // Perform login steps on both pages
     await Promise.all([performLogin(page1), performLogin(page2)]);
+    const regResponse = await page1._regCheckPromise;
+    const regBody = await regResponse.json();
+    console.log('regBody:', regBody);
+    sessionId = regBody.validSessions[0];
   });
 
-  // Logout after each tests:
+  // Logout after each test:
   test.afterEach(async ({ page }) => {
     await logOutFromPage(page);
     await logOutFromPage(page1);
-});
+  });
 
   test("Verify a new avatar has changed for previous comments", async () => {
-    let sessionId;
-    let oldCommentId;
-    let newCommentId;
-    let commentApiUrl;
-    
-    await page1.on("response", async (response) => {
-      if (response.url().includes(regApiUrl)) {
-        const responseBody = await response.json();
-        sessionId = responseBody.validSessions[0];
-      }
-    });
-
-    // Page1: EvenPage -  Type fisrt testing comment
+    // Page1: EventPage - Type first testing comment
     const eventPage = new EventPage(page1);
-    await eventPage.navigate();
+    await eventPage.watchButton.click();
     await page1.waitForLoadState("networkidle");
-    commentApiUrl = `${apiUrl}e3-comment/${sessionId}`;
-    const resPromise = page1.waitForResponse(commentApiUrl);
-    await typeComment(eventPage, "Comment#01");
-    const res = await resPromise;
-    const responseBody = await res.json();
-    oldCommentId = responseBody.id;
-
-    // // Page2: ProfilePage - Change avatar
+    oldCommentId = await typeComment(page1, eventPage, "Comment#00001", sessionId);
+   
+    // Page2: ProfilePage - Change avatar
     const profilePage = new ProfilePage(page2);
     await profilePage.navigateToProfile();
     const currentAvatar = await profilePage.avatar.getAttribute("style");
@@ -137,18 +133,15 @@ test.describe("Verify how changing user's data reflects on event page", () => {
       newAvaUrl
     );
 
-    // Page1: EvenPage -  Verify avatar was changed for priveouse comments too
-    const resPromise2 = page1.waitForResponse(commentApiUrl);
-    await typeComment(eventPage, "Comment#02");
-    const res2 = await resPromise2;
-    const responseBody2 = await res2.json();
-    newCommentId = responseBody2.id;
+    // Page1: EventPage - Verify avatar was changed for previous comments too
+    newCommentId = await typeComment(page1, eventPage, "Comment#00002", sessionId);
+
     const newCommentSel = await page1
-    .locator(`#chat-comment-${oldCommentId}>.chat-avatar`)
-    .getAttribute("style");
+      .locator(`#chat-comment-${newCommentId}>.chat-avatar`)
+      .getAttribute("style");
     const newCommentAvaLink = getAvaLink(newCommentSel);
     expect(newCommentAvaLink).toEqual(newAvaUrl);
-
+    
     const previousCommentSel = await page1
       .locator(`#chat-comment-${oldCommentId}>.chat-avatar`)
       .getAttribute("style");
@@ -157,27 +150,11 @@ test.describe("Verify how changing user's data reflects on event page", () => {
   });
 
   test('Verify a new name has changed for previous comments', async () => {
-    let sessionId;
-    let oldCommentId;
-    let newCommentId;
-
-    await page1.on("response", async (response) => {
-        if (response.url().includes(regApiUrl)) {
-          const responseBody = await response.json();
-          sessionId = responseBody.validSessions[0];
-        }
-      });
-    
-
-    // Page1: EvenPage -  Type fisrt testing comment
+    // Page1: EventPage - Type first testing comment
     const eventPage = new EventPage(page1);
-    await eventPage.navigate();
+    await eventPage.watchButton.click();
     await page1.waitForLoadState("networkidle");
-    const resPromise = page1.waitForResponse(`${apiUrl}e3-comment/${sessionId}`);
-    await typeComment(eventPage, "Name checking comment#01");
-    const res = await resPromise;
-    const responseBody = await res.json();
-    oldCommentId = responseBody.id;
+    oldCommentId = await typeComment(page1, eventPage, "Comment#01", sessionId);
 
     // Page2: ProfilePage - Change first and last names
     const profilePage = new ProfilePage(page2);
@@ -192,17 +169,15 @@ test.describe("Verify how changing user's data reflects on event page", () => {
     await page2.waitForLoadState("networkidle");
     await expect(profilePage.name).toHaveText(firstName + ' ' + lastName);
 
-    // Page1: EvenPage -  Verify first and last name changed for priveouse comments too
-    const resPromise2 = page1.waitForResponse(`${apiUrl}e3-comment/${sessionId}`);
-    await typeComment(eventPage, "Name checking comment#02");
-    const res2 = await resPromise2;
-    const responseBody2 = await res2.json();
-    newCommentId = responseBody2.id;
+    // Page1: EventPage - Verify first and last name changed for previous comments too
+    newCommentId = await typeComment(page1, eventPage, "Comment#02", sessionId);
+
     const newCommentSel = await page1
-        .locator(`#chat-comment-${newCommentId} .chat-commenter-name`);
-    expect(newCommentSel).toHaveText(firstName + ' '  + lastName);
+      .locator(`#chat-comment-${newCommentId} .chat-commenter-name`);
+    await expect(newCommentSel).toHaveText(firstName + ' '  + lastName);
+
     const previousCommentSel = await page1
       .locator(`#chat-comment-${oldCommentId} .chat-commenter-name`);
-    expect(previousCommentSel).toHaveText(firstName + ' '  + lastName);
+    await expect(previousCommentSel).toHaveText(firstName + ' '  + lastName);
   });
 });

@@ -4,12 +4,11 @@
 - add next env varaibles:
     ```python
     BASE_URL = "your base url"
-    API_URL = "your api url"
-    USER_EMAIL = "your test user email"
-    USER_PASSWORD = "password for your test user"
-    HOST = "host of outlook"
     EVENT_ID = "your even id"
-    TES_URL = "url for api call to grab session id"
+    MAILSLURP_API_KEY=
+    MAILOSAUR_SERVER_ID=
+    MAILOSAUR_API_KEY=
+    MAILOSAUR_EMAIL_PREFIX=
     ```
 - use at least 18 verstion of node
 - run `npm install` to install all dependenses 
