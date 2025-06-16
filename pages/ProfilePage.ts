@@ -45,6 +45,14 @@ export class ProfilePage {
         await this.heading.waitFor({ state: 'visible' });
     }
 
+    async updatefullName(firstName: string, lastName: string) {
+        await this.editButton.click();
+        await this.editModal.waitFor({state: 'visible'});
+        await this.firstNameInput.fill(firstName); 
+        await this.lastNameInput.fill(lastName);
+        await this.saveButton.click();
+    }
+
     static async logOutFromPage(pageInstance: Page) {
         const profilePage = new ProfilePage(pageInstance);
         await profilePage.navigateToProfile();

@@ -22,7 +22,7 @@ export class EventPage extends HelperBase {
         this.saveButton = page.getByRole('button', { name: 'Send' });
       }
 
-    async typeComment(comment: string, sessionId: string | number): Promise<string> {
+    async typeComment(comment: string, sessionId: string | number): Promise<number> {
       await this.chatInput.fill(comment);
       const commentApiUrl = `e3-comment/${sessionId}`;
       const resPromise = this.page.waitForResponse(response =>
@@ -34,7 +34,7 @@ export class EventPage extends HelperBase {
       return responseBody.id;
     }
 
-    async verifyAvatarLink(commentId: string, newAvaUrl: string) {
+    async verifyAvatarLink(commentId: number, newAvaUrl: string) {
       const style = await this.page
         .locator(`#chat-comment-${commentId}>.chat-avatar`)
         .getAttribute("style");
@@ -42,7 +42,7 @@ export class EventPage extends HelperBase {
       expect(avatarLink).toEqual(newAvaUrl);
     }
 
-    async getCommenterName(commentId: string, firstName: string, lastName: string) {
+    async getCommenterName(commentId: number, firstName: string, lastName: string) {
       const nameLocator =  this.page.locator(`#chat-comment-${commentId} .chat-commenter-name`);
       await expect(nameLocator).toHaveText(firstName + ' '  + lastName);
     }
