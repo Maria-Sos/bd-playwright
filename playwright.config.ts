@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 dotenv.config();
 import { defineConfig, devices } from "@playwright/test";
 
@@ -27,10 +27,9 @@ export default defineConfig({
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+    { 
+      name: 'edge',
+      use: { ...devices['Desktop Edge'] }
     }
   ]
 });

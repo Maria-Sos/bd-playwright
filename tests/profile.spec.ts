@@ -45,9 +45,13 @@ test.describe("Verify how changing user's data reflects on event page", () => {
   });
 
   // Logout after each test:
-  test.afterEach(async ({ page }) => {
-    await ProfilePage.logOutFromPage(page1);
-    await ProfilePage.logOutFromPage(page2);
+  test.afterEach(async () => {
+    if (page1) {
+      await ProfilePage.logOutFromPage(page1);
+    }
+    if (page2) {
+      await ProfilePage.logOutFromPage(page2);
+    }
   });
 
   test("Verify a new avatar has changed for previous comments", async () => {
